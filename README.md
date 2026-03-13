@@ -9,6 +9,7 @@ Built with Node.js and powered by a swift, local SQLite database.
 *   **👥 Multi-User Profiles:** Independent profiles mean you can track your workouts, while sharing the same CLI with a workout partner or tracking a separate rehabilitation profile.
 *   **📚 Global Exercise Library:** Add exercises once, and they are available across all profiles. Track muscle groups, exercise types, and equipment.
 *   **⏱️ Active Session Management:** Start a workout, log sets in real-time, add specific metadata (like RIR or notes) to individual sets, undo mistakes, and mark the session done.
+*   **📋 Workout Templates:** Create pre-defined routines with specific exercises and target set configurations. No need to look up your program every time—just start the template and go.
 *   **📊 Scientific Progression Algorithm:** Instead of just showing raw numbers, the `progression` command calculates your Estimated 1-Rep Max (e1RM) and Total Volume Load over time. It uses Double Progression logic to give you an AI-driven recommendation for your next session.
 *   **🩹 Injury Tracking & Safety:** Log injuries with specific severities (mild, moderate, severe) tied to body regions and affected exercises. The progression algorithm automatically detects relevant active injuries and overrides standard recommendations with safety protocols (e.g., "Reduce weight by 30-50%" or "STOP this exercise").
 *   **🎗️ Band Resistance Tracking:** Dedicated support for resistance bands where progression is tracked via **Levels** (numeric values mapped to band colors) and high reps. The AI recommendation engine automatically adapts for band-specific progressive overload targets (e.g., hitting 15 reps to move to the next band level).
@@ -54,6 +55,9 @@ The CLI tracks your *active* session state.
 ```bash
 # Start a new blank workout session
 workout --profile mike start --empty
+
+# Start a workout using a pre-saved template (e.g., "Push Day")
+workout --profile mike start "Push Day"
 
 # Log actual work sets (Weight, then Reps)
 workout --profile mike log "Dumbbell RDL" 50 10
@@ -134,6 +138,21 @@ workout --profile mike log "Band Pull-apart" 2 15
 workout --profile mike progression "Band Pull-apart"
 ```
 The AI recommendation engine considers **15 reps** the point for progressing to the next band level.
+
+### 7. Workout Templates 📋
+Create reusable routines to save time.
+
+```bash
+# Create a new template with exercises and their target reps
+# Format: "exercise:config" (e.g. bench-press:4x8)
+workout templates create "Upper Body" --exercises "bench-press:3x10,pull-up:3x12,ohp:3x8"
+
+# List all your templates
+workout templates list
+
+# View the exercise list within a specific template
+workout templates show "Upper Body"
+```
 
 ### Scripting & JSON output
 Add `--json` to *any* command to get structured, parseable output:
