@@ -65,6 +65,21 @@ describe('analyzer module tests', () => {
       expect(analyzed[0].date).toBe('2024-01-01');
       expect(analyzed[1].date).toBe('2024-02-01');
     });
+
+    test('should track maxReps and totalReps', () => {
+      const history = [
+        { date: '2024-01-01', weight: 0, reps: 15, set_number: 1 },
+        { date: '2024-01-01', weight: 0, reps: 12, set_number: 2 },
+        { date: '2024-01-08', weight: 2, reps: 10, set_number: 1 },
+      ];
+      const analyzed = analyzeProgression(history as any);
+      
+      expect(analyzed[0].maxReps).toBe(15);
+      expect(analyzed[0].totalReps).toBe(27);
+      
+      expect(analyzed[1].maxReps).toBe(10);
+      expect(analyzed[1].totalReps).toBe(10);
+    });
   });
 
   describe('detectRegression', () => {
@@ -149,6 +164,74 @@ describe('analyzer module tests', () => {
       }];
       const rec = generateRecommendation(analyzed as any);
       expect(rec).toContain('Increase the weight to 102.5kg');
+    });
+
+    test('should recommend keeping weight exactly same and pushing reps if under lower rep target', () => {
+      const analyzed = [
+        {
+          date: '2024-01-01',
+          sets: [{ weight: 100, reps: 5 }],
+          maxE1rm: calculateEpley1RM(100, 5) as any,
+          volumeLoad: 500,
+          maxReps: 5,
+          totalReps: 5
+        }
+      ];
+      const rec = generateRecommendation(analyzed as any);
+      expect(rec).toMatch(/Keep the weight exactly the same next session and try to push for 6-7 reps/i);
+    });
+
+    describe('Band Equipment Logic', () => {
+      const bandExercise = { id: 1, name: 'Pull Apart', muscles: 'shoulders', type: 'isolation', equipment: 'band' };
+
+      test('should recommend progressing to next band level if upper target (15+) is hit', () => {
+        const analyzed = [
+          {
+            date: '2024-01-01',
+            sets: [{ weight: 2, reps: 16 }],
+            maxE1rm: calculateEpley1RM(2, 16) as any,
+            volumeLoad: 32,
+            maxReps: 16,
+            totalReps: 16
+          }
+        ];
+        const rec = generateRecommendation(analyzed as any, bandExercise as any);
+        expect(rec).toMatch(/increase the resistance to the next band level and aim for 10 reps/i);
+        expect(rec).toMatch(/Band Level 2/i);
+      });
+
+      test('should recommend pushing reps if under lower target (10)', () => {
+        const analyzed = [
+          {
+            date: '2024-01-01',
+            sets: [{ weight: 3, reps: 8 }],
+            maxE1rm: calculateEpley1RM(3, 8) as any,
+            volumeLoad: 24,
+            maxReps: 8,
+            totalReps: 8
+          }
+        ];
+        const rec = generateRecommendation(analyzed as any, bandExercise as any);
+        expect(rec).toMatch(/push for 9-10 reps/i);
+        expect(rec).toMatch(/Band Level 3/i);
+      });
+
+      test('should recommend pushing closer to upper target if in sweet spot (10-14)', () => {
+        const analyzed = [
+          {
+            date: '2024-01-01',
+            sets: [{ weight: 0, reps: 12 }],
+            maxE1rm: 0,
+            volumeLoad: 0,
+            maxReps: 12,
+            totalReps: 12
+          }
+        ];
+        // 0 weight implies they just logged reps
+        const rec = generateRecommendation(analyzed as any, bandExercise as any);
+        expect(rec).toMatch(/closer to 15 reps next time/i);
+        expect(rec).toMatch(/Band Level 0/i);
+      });
     });
 
     test('should recommend building volume if reps < 8', () => {

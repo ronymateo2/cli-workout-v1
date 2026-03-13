@@ -14,7 +14,11 @@ export function calculateEpley1RM(weight: number, reps: number): number {
  * Analyzes historical sets and groups them by workout to track progression metrics.
  * Expects array of sets sorted chronologically: [{ date, weight, reps, set_number }, ...]
  */
-import { WorkoutSet, AnalyzedSession } from './types.js';
+/**
+ * Analyzes historical sets and groups them by workout to track progression metrics.
+ * Expects array of sets sorted chronologically: [{ date, weight, reps, set_number }, ...]
+ */
+import { WorkoutSet, AnalyzedSession, Exercise } from './types.js';
 
 export function analyzeProgression(historySets: WorkoutSet[]): AnalyzedSession[] {
   if (!historySets || historySets.length === 0) return [];
@@ -28,6 +32,8 @@ export function analyzeProgression(historySets: WorkoutSet[]): AnalyzedSession[]
         sets: [],
         maxE1rm: 0,
         volumeLoad: 0,
+        maxReps: 0,
+        totalReps: 0,
       });
     }
     
@@ -40,6 +46,10 @@ export function analyzeProgression(historySets: WorkoutSet[]): AnalyzedSession[]
     }
     
     session.volumeLoad += (set.weight * set.reps);
+    session.totalReps += set.reps;
+    if (set.reps > session.maxReps) {
+      session.maxReps = set.reps;
+    }
   }
 
   // Convert map to sorted array (oldest to newest)
@@ -107,7 +117,7 @@ export function detectRegression(analyzedSessions: AnalyzedSession[]) {
  *  2. Single-session regression → recommend deload / caution
  *  3. Normal double progression logic
  */
-export function generateRecommendation(analyzedSessions: AnalyzedSession[]): string | null {
+export function generateRecommendation(analyzedSessions: AnalyzedSession[], exercise?: Exercise): string | null {
   if (analyzedSessions.length === 0) return null;
 
   // ── Injury / Regression Check ──────────────────────────────────
@@ -134,12 +144,25 @@ export function generateRecommendation(analyzedSessions: AnalyzedSession[]): str
     return best;
   }, lastSession.sets[0]);
 
-  if (!topSet || !topSet.weight) return "Keep logging weights to see recommendations.";
+  if ((!topSet || !topSet.weight) && exercise?.equipment !== 'band') {
+    return "Keep logging weights to see recommendations.";
+  }
 
-  const upperRepTarget = 12;
-  const lowerRepTarget = 8;
+  const upperRepTarget = exercise?.equipment === 'band' ? 15 : 12;
+  const lowerRepTarget = exercise?.equipment === 'band' ? 10 : 8;
+
+  if (exercise?.equipment === 'band') {
+    if (topSet.reps >= upperRepTarget) {
+      return `Awesome! You hit ${topSet.reps} reps at Band Level ${topSet.weight || 0}. It's time to progress! For your next session, increase the resistance to the next band level and aim for ${lowerRepTarget} reps.`;
+    } else if (topSet.reps < lowerRepTarget) {
+      return `You hit ${topSet.reps} reps at Band Level ${topSet.weight || 0}. Keep the resistance exactly the same next session and try to push for ${topSet.reps + 1}-${topSet.reps + 2} reps to build capacity.`;
+    } else {
+      return `Solid work hitting ${topSet.reps} reps at Band Level ${topSet.weight || 0}. Keep the resistance the same and try to push closer to ${upperRepTarget} reps next time to master this level!`;
+    }
+  }
+
   const standardIncrease = 2.5; // kg
-
+  
   if (topSet.reps >= upperRepTarget) {
     return `You crushed ${topSet.reps} reps at ${topSet.weight}kg! It's time to apply progressive overload. Increase the weight to ${topSet.weight + standardIncrease}kg next session and aim for ${lowerRepTarget} reps.`;
   } else if (topSet.reps < lowerRepTarget) {
@@ -148,3 +171,4 @@ export function generateRecommendation(analyzedSessions: AnalyzedSession[]): str
     return `Solid work hitting ${topSet.reps} reps at ${topSet.weight}kg. You are in the sweet spot. Keep the weight the same and try to push closer to ${upperRepTarget} reps next time!`;
   }
 }
+

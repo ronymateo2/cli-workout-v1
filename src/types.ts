@@ -40,6 +40,8 @@ export interface AnalyzedSession {
   sets: WorkoutSet[];
   maxE1rm: number;
   volumeLoad: number;
+  maxReps: number;
+  totalReps: number;
 }
 
 export interface Injury {

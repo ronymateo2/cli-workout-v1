@@ -142,7 +142,7 @@ export function registerStatsCommands(program) {
         const isJson = program.opts().json;
         try {
             const profile = getProfile(program.opts().profile);
-            const exercise = db.prepare('SELECT id, name, muscles FROM exercises WHERE name = ? COLLATE NOCASE').get(exerciseName);
+            const exercise = db.prepare('SELECT id, name, muscles, equipment FROM exercises WHERE name = ? COLLATE NOCASE').get(exerciseName);
             if (!exercise)
                 throw new Error(`Exercise '${exerciseName}' not found.`);
             // ── Check for active injuries that affect this exercise ──
@@ -180,7 +180,7 @@ export function registerStatsCommands(program) {
             }
             // Run scientific analysis
             const analyzed = analyzeProgression(historySets);
-            let recommendation = generateRecommendation(analyzed);
+            let recommendation = generateRecommendation(analyzed, exercise);
             // Override recommendation if injury is active
             if (relevantInjuries.length > 0) {
                 const injuryNames = relevantInjuries.map(i => `${i.body_region} (${i.severity})`).join(', ');
@@ -211,12 +211,19 @@ export function registerStatsCommands(program) {
                 });
                 console.log('');
             }
-            const table = new Table({ head: ['Date', 'Max e1RM', 'Total Volume (kg)'], style: { head: ['cyan'] } });
-            analyzed.forEach(a => table.push([
-                a.date,
-                `${a.maxE1rm.toFixed(1)}kg`,
-                `${a.volumeLoad.toFixed(1)}kg`
-            ]));
+            const isBand = exercise.equipment === 'band';
+            const metricCol1 = isBand ? 'Max Band Lvl (or Reps)' : 'Max e1RM';
+            const metricCol2 = isBand ? 'Total Reps' : 'Total Volume (kg)';
+            const table = new Table({ head: ['Date', metricCol1, metricCol2], style: { head: ['cyan'] } });
+            analyzed.forEach(a => {
+                if (isBand) {
+                    const displayCol1 = a.maxE1rm > 0 ? `Lvl ${a.sets.reduce((max, s) => Math.max(max, s.weight || 0), 0)}` : `${a.maxReps} reps`;
+                    table.push([a.date, displayCol1, `${a.totalReps} reps`]);
+                }
+                else {
+                    table.push([a.date, `${a.maxE1rm.toFixed(1)}kg`, `${a.volumeLoad.toFixed(1)}kg`]);
+                }
+            });
             console.log(table.toString());
             console.log(chalk.bold('\n💡 AI Recommendation:'));
             console.log(chalk.dim(recommendation) + '\n');
