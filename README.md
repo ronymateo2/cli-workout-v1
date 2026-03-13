@@ -11,6 +11,7 @@ Built with Node.js and powered by a swift, local SQLite database.
 *   **⏱️ Active Session Management:** Start a workout, log sets in real-time, add specific metadata (like RIR or notes) to individual sets, undo mistakes, and mark the session done.
 *   **📊 Scientific Progression Algorithm:** Instead of just showing raw numbers, the `progression` command calculates your Estimated 1-Rep Max (e1RM) and Total Volume Load over time. It uses Double Progression logic to give you an AI-driven recommendation for your next session.
 *   **🩹 Injury Tracking & Safety:** Log injuries with specific severities (mild, moderate, severe) tied to body regions and affected exercises. The progression algorithm automatically detects relevant active injuries and overrides standard recommendations with safety protocols (e.g., "Reduce weight by 30-50%" or "STOP this exercise").
+*   **🎗️ Band Resistance Tracking:** Dedicated support for resistance bands where progression is tracked via **Levels** (numeric values mapped to band colors) and high reps. The AI recommendation engine automatically adapts for band-specific progressive overload targets (e.g., hitting 15 reps to move to the next band level).
 *   **🤖 Full JSON Support:** Every single command supports the `--json` flag, making this CLI perfectly suited for automation, scripting, or piping data into other tools.
 
 ## Installation 🚀
@@ -118,6 +119,21 @@ workout --profile mike injury update 1 -s moderate -n "swelling reduced"
 # Mark an injury as recovered
 workout --profile mike injury recover 1
 ```
+
+### 6. Rehabilitation & Resistance Bands 🎗️
+Resistance bands don't use raw weights. Instead, log the **Band Level** as the weight (e.g., Level 1 = Yellow, Level 2 = Red).
+
+```bash
+# Add a band isolation exercise
+workout exercises add "Band Pull-apart" --muscles shoulders --type isolation --equipment band
+
+# Log a session using Level 2 band for 15 reps
+workout --profile mike log "Band Pull-apart" 2 15
+
+# View specialized band progression metrics (Max Band Level vs Max Reps)
+workout --profile mike progression "Band Pull-apart"
+```
+The AI recommendation engine considers **15 reps** the point for progressing to the next band level.
 
 ### Scripting & JSON output
 Add `--json` to *any* command to get structured, parseable output:
