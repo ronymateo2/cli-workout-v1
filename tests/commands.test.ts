@@ -38,7 +38,7 @@ describe('commands logic tests', () => {
         if (e.message !== 'process.exit called') throw e;
       }
       
-      const ex = db.prepare('SELECT * FROM exercises WHERE name = ?').get('Bench Press');
+      const ex = db.prepare('SELECT * FROM exercises WHERE name = ?').get('Bench Press') as any;
       expect(ex).toBeDefined();
       expect(ex.muscles).toBe('chest');
     });
@@ -58,7 +58,7 @@ describe('commands logic tests', () => {
     test('create profile should insert into db', async () => {
       await program.parseAsync(['node', 'workout', 'profile', 'create', 'sarah']);
       
-      const profile = db.prepare('SELECT * FROM profiles WHERE name = ?').get('sarah');
+      const profile = db.prepare('SELECT * FROM profiles WHERE name = ?').get('sarah') as any;
       expect(profile).toBeDefined();
     });
 
@@ -67,7 +67,7 @@ describe('commands logic tests', () => {
       
       await program.parseAsync(['node', 'workout', 'profile', 'delete', 'old']);
       
-      const profile = db.prepare('SELECT * FROM profiles WHERE name = ?').get('old');
+      const profile = db.prepare('SELECT * FROM profiles WHERE name = ?').get('old') as any;
       expect(profile).toBeUndefined();
     });
   });

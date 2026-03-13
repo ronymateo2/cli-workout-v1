@@ -18,7 +18,7 @@ export function registerStatsCommands(program) {
           SELECT * FROM workouts 
           WHERE profile_id = ? AND status = 'completed' 
           ORDER BY end_time DESC LIMIT 1
-        `).get(profile.id);
+        `).get(profile.id) as any;
 
         if (!lastWorkout) {
           console.log(chalk.yellow(`No completed workouts found for ${profile.name}.`));
@@ -31,7 +31,7 @@ export function registerStatsCommands(program) {
           JOIN exercises e ON ws.exercise_id = e.id
           WHERE ws.workout_id = ?
           ORDER BY ws.id ASC
-        `).all(lastWorkout.id);
+        `).all(lastWorkout.id) as any[];
 
         if (isJson) {
            console.log(JSON.stringify({ workout: lastWorkout, sets }, null, 2));
@@ -58,7 +58,7 @@ export function registerStatsCommands(program) {
       const isJson = program.opts().json;
       try {
         const profile = getProfile(program.opts().profile);
-        const exercise = db.prepare('SELECT id FROM exercises WHERE name = ? COLLATE NOCASE').get(exerciseName);
+        const exercise = db.prepare('SELECT id FROM exercises WHERE name = ? COLLATE NOCASE').get(exerciseName) as any;
         if (!exercise) throw new Error(`Exercise '${exerciseName}' not found.`);
 
         const history = db.prepare(`
@@ -68,7 +68,7 @@ export function registerStatsCommands(program) {
           WHERE w.profile_id = ? AND ws.exercise_id = ? AND w.status = 'completed'
           ORDER BY w.start_time DESC, ws.set_number ASC
           LIMIT 50
-        `).all(profile.id, exercise.id);
+        `).all(profile.id, exercise.id) as any[];
 
         if (isJson) {
           console.log(JSON.stringify({ history }, null, 2));
@@ -107,7 +107,7 @@ export function registerStatsCommands(program) {
         let params = [profile.id];
 
         if (exerciseName) {
-           const exercise = db.prepare('SELECT id FROM exercises WHERE name = ? COLLATE NOCASE').get(exerciseName);
+           const exercise = db.prepare('SELECT id FROM exercises WHERE name = ? COLLATE NOCASE').get(exerciseName) as any;
            if (!exercise) throw new Error(`Exercise '${exerciseName}' not found.`);
            query += ` AND ws.exercise_id = ? GROUP BY e.id`;
            params.push(exercise.id);
@@ -115,7 +115,7 @@ export function registerStatsCommands(program) {
            query += ` GROUP BY e.id ORDER BY e.name ASC`;
         }
 
-        const prs = db.prepare(query).all(...params);
+        const prs = db.prepare(query).all(...params) as any[];
 
         if (isJson) {
           console.log(JSON.stringify(prs, null, 2));
@@ -152,14 +152,14 @@ export function registerStatsCommands(program) {
       const isJson = program.opts().json;
       try {
         const profile = getProfile(program.opts().profile);
-        const exercise = db.prepare('SELECT id, name, muscles FROM exercises WHERE name = ? COLLATE NOCASE').get(exerciseName);
+        const exercise = db.prepare('SELECT id, name, muscles FROM exercises WHERE name = ? COLLATE NOCASE').get(exerciseName) as any;
         if (!exercise) throw new Error(`Exercise '${exerciseName}' not found.`);
 
         // ── Check for active injuries that affect this exercise ──
         const activeInjuries = db.prepare(`
           SELECT * FROM injuries 
           WHERE profile_id = ? AND status = 'active'
-        `).all(profile.id);
+        `).all(profile.id) as any[];
 
         const relevantInjuries = activeInjuries.filter(inj => {
           if (inj.affected_exercises) {
@@ -180,7 +180,7 @@ export function registerStatsCommands(program) {
           JOIN workouts w ON ws.workout_id = w.id
           WHERE w.profile_id = ? AND ws.exercise_id = ? AND w.status = 'completed' AND ws.weight IS NOT NULL
           ORDER BY w.start_time ASC, ws.set_number ASC
-        `).all(profile.id, exercise.id);
+        `).all(profile.id, exercise.id) as any[];
 
         if (historySets.length === 0) {
           if (isJson) console.log(JSON.stringify({ error: `Not enough data for ${exercise.name}` }));

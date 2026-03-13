@@ -20,7 +20,7 @@ exercisesCmd
     }
     query += ' ORDER BY name ASC';
     
-    const exercises = db.prepare(query).all(...params);
+    const exercises = db.prepare(query).all(...params) as any[];
 
     if (isJson) {
       console.log(JSON.stringify(exercises, null, 2));

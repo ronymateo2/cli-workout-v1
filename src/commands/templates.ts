@@ -14,7 +14,7 @@ templatesCmd
     const isJson = templatesCmd.parent.opts().json;
     try {
       const profile = getProfile(templatesCmd.parent.opts().profile);
-      const templates = db.prepare('SELECT * FROM templates WHERE profile_id = ? ORDER BY name ASC').all(profile.id);
+      const templates = db.prepare('SELECT * FROM templates WHERE profile_id = ? ORDER BY name ASC').all(profile.id) as any[];
 
       if (isJson) {
         console.log(JSON.stringify(templates, null, 2));
@@ -40,7 +40,7 @@ templatesCmd
     const isJson = templatesCmd.parent.opts().json;
     try {
       const profile = getProfile(templatesCmd.parent.opts().profile);
-      const template = db.prepare('SELECT id FROM templates WHERE profile_id = ? AND name = ? COLLATE NOCASE').get(profile.id, name);
+      const template = db.prepare('SELECT id FROM templates WHERE profile_id = ? AND name = ? COLLATE NOCASE').get(profile.id, name) as any;
       if (!template) throw new Error(`Template '${name}' not found.`);
 
       const exercises = db.prepare(`
@@ -49,7 +49,7 @@ templatesCmd
         JOIN exercises e ON te.exercise_id = e.id
         WHERE te.template_id = ?
         ORDER BY te.sort_order ASC
-      `).all(template.id);
+      `).all(template.id) as any[];
 
       if (isJson) {
         console.log(JSON.stringify({ name, exercises }, null, 2));

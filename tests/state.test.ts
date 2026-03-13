@@ -51,7 +51,7 @@ describe('state module tests', () => {
     expect(getActiveWorkout(profileId)).toBeUndefined();
     
     // verify in db directly
-    const w = db.prepare('SELECT status FROM workouts WHERE id = ?').get(workoutId);
+    const w = db.prepare('SELECT status FROM workouts WHERE id = ?').get(workoutId) as any;
     expect(w.status).toBe('completed');
   });
 
@@ -73,7 +73,7 @@ describe('state module tests', () => {
     
     logSets(workoutId, exDbRdlId, sets);
 
-    const logged = db.prepare('SELECT * FROM workout_sets WHERE workout_id = ? ORDER BY set_number ASC').all(workoutId);
+    const logged = db.prepare('SELECT * FROM workout_sets WHERE workout_id = ? ORDER BY set_number ASC').all(workoutId) as any[];
     expect(logged.length).toBe(2);
     expect(logged[0].weight).toBe(50);
     expect(logged[0].reps).toBe(10);

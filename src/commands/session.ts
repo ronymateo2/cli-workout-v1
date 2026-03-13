@@ -19,7 +19,7 @@ export function registerSessionCommands(program) {
         let templateId = null;
 
         if (templateName && !options.empty) {
-          const template = db.prepare('SELECT id FROM templates WHERE profile_id = ? AND name = ? COLLATE NOCASE').get(profile.id, templateName);
+          const template = db.prepare('SELECT id FROM templates WHERE profile_id = ? AND name = ? COLLATE NOCASE').get(profile.id, templateName) as any;
           if (!template) {
             throw new Error(`Template '${templateName}' not found for profile '${profile.name}'.`);
           }
@@ -105,7 +105,7 @@ export function registerSessionCommands(program) {
           const exercise = getExerciseByName(noteOrExercise);
           // Find the latest max set number for this exercise to attach note? Or attach to all missing?
           // Actually, let's attach the note to the most recently logged set of this exercise for this workout
-          const latestSet = db.prepare('SELECT id FROM workout_sets WHERE workout_id = ? AND exercise_id = ? ORDER BY id DESC LIMIT 1').get(workout.id, exercise.id);
+          const latestSet = db.prepare('SELECT id FROM workout_sets WHERE workout_id = ? AND exercise_id = ? ORDER BY id DESC LIMIT 1').get(workout.id, exercise.id) as any;
           
           if (!latestSet) {
              throw new Error(`You haven't logged any sets for '${exercise.name}' in this session to attach a note to.`);
@@ -202,9 +202,9 @@ export function registerSessionCommands(program) {
         let lastSet;
         if (exerciseName) {
           const exercise = getExerciseByName(exerciseName);
-          lastSet = db.prepare('SELECT id FROM workout_sets WHERE workout_id = ? AND exercise_id = ? ORDER BY id DESC LIMIT 1').get(workout.id, exercise.id);
+          lastSet = db.prepare('SELECT id FROM workout_sets WHERE workout_id = ? AND exercise_id = ? ORDER BY id DESC LIMIT 1').get(workout.id, exercise.id) as any;
         } else {
-          lastSet = db.prepare('SELECT id FROM workout_sets WHERE workout_id = ? ORDER BY id DESC LIMIT 1').get(workout.id);
+          lastSet = db.prepare('SELECT id FROM workout_sets WHERE workout_id = ? ORDER BY id DESC LIMIT 1').get(workout.id) as any;
         }
 
         if (!lastSet) throw new Error('No sets to undo.');
@@ -235,7 +235,7 @@ export function registerSessionCommands(program) {
         const exercise = getExerciseByName(exerciseName);
         const setNum = parseInt(setNumStr, 10);
 
-        const targetSet = db.prepare('SELECT id, weight, reps, rir FROM workout_sets WHERE workout_id = ? AND exercise_id = ? AND set_number = ?').get(workout.id, exercise.id, setNum);
+        const targetSet = db.prepare('SELECT id, weight, reps, rir FROM workout_sets WHERE workout_id = ? AND exercise_id = ? AND set_number = ?').get(workout.id, exercise.id, setNum) as any;
 
         if (!targetSet) throw new Error(`Set ${setNum} not found for ${exercise.name}.`);
 
@@ -267,7 +267,7 @@ export function registerSessionCommands(program) {
         const exercise = getExerciseByName(exerciseName);
         const setNum = parseInt(setNumStr, 10);
 
-        const targetSet = db.prepare('SELECT id FROM workout_sets WHERE workout_id = ? AND exercise_id = ? AND set_number = ?').get(workout.id, exercise.id, setNum);
+        const targetSet = db.prepare('SELECT id FROM workout_sets WHERE workout_id = ? AND exercise_id = ? AND set_number = ?').get(workout.id, exercise.id, setNum) as any;
 
         if (!targetSet) throw new Error(`Set ${setNum} not found for ${exercise.name}.`);
 

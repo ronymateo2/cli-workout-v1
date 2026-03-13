@@ -33,10 +33,10 @@ describe('templates and stats commands tests', () => {
     test('create template should work', async () => {
       await program.parseAsync(['node', 'workout', '--profile', 'mike', '--json', 'templates', 'create', 'Push', '--exercises', 'Bench Press:4x8']);
       
-      const template = db.prepare("SELECT * FROM templates WHERE name = 'Push'").get();
+      const template = db.prepare("SELECT * FROM templates WHERE name = 'Push'").get() as any;
       expect(template).toBeDefined();
       
-      const te = db.prepare('SELECT * FROM template_exercises WHERE template_id = ?').get(template.id);
+      const te = db.prepare('SELECT * FROM template_exercises WHERE template_id = ?').get(template.id) as any;
       expect(te.sets_config).toBe('4x8');
     });
 

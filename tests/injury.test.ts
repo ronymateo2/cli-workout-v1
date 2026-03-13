@@ -30,7 +30,7 @@ describe('injury commands tests', () => {
     test('should add an injury to the profile', async () => {
       await program.parseAsync(['node', 'workout', '--profile', 'mike', '--json', 'injury', 'add', 'left knee', '-s', 'moderate', '-d', 'MCL sprain', '-e', 'squat,leg press']);
       
-      const injury = db.prepare("SELECT * FROM injuries WHERE body_region = 'left knee'").get();
+      const injury = db.prepare("SELECT * FROM injuries WHERE body_region = 'left knee'").get() as any;
       expect(injury).toBeDefined();
       expect(injury.severity).toBe('moderate');
       expect(injury.description).toBe('MCL sprain');
@@ -41,7 +41,7 @@ describe('injury commands tests', () => {
     test('should default severity to mild', async () => {
       await program.parseAsync(['node', 'workout', '--profile', 'mike', '--json', 'injury', 'add', 'right shoulder']);
       
-      const injury = db.prepare("SELECT * FROM injuries WHERE body_region = 'right shoulder'").get();
+      const injury = db.prepare("SELECT * FROM injuries WHERE body_region = 'right shoulder'").get() as any;
       expect(injury).toBeDefined();
       expect(injury.severity).toBe('mild');
     });
@@ -75,11 +75,11 @@ describe('injury commands tests', () => {
   describe('injury recover', () => {
     test('should mark an injury as recovered', async () => {
       db.prepare("INSERT INTO injuries (profile_id, body_region, severity, status) VALUES (1, 'left knee', 'moderate', 'active')").run();
-      const injury = db.prepare('SELECT id FROM injuries LIMIT 1').get();
+      const injury = db.prepare('SELECT id FROM injuries LIMIT 1').get() as any;
 
       await program.parseAsync(['node', 'workout', '--profile', 'mike', '--json', 'injury', 'recover', String(injury.id)]);
       
-      const updated = db.prepare('SELECT * FROM injuries WHERE id = ?').get(injury.id);
+      const updated = db.prepare('SELECT * FROM injuries WHERE id = ?').get(injury.id) as any;
       expect(updated.status).toBe('recovered');
       expect(updated.recovery_date).toBeDefined();
     });
@@ -96,11 +96,11 @@ describe('injury commands tests', () => {
   describe('injury update', () => {
     test('should update severity and notes', async () => {
       db.prepare("INSERT INTO injuries (profile_id, body_region, severity, status) VALUES (1, 'left knee', 'mild', 'active')").run();
-      const injury = db.prepare('SELECT id FROM injuries LIMIT 1').get();
+      const injury = db.prepare('SELECT id FROM injuries LIMIT 1').get() as any;
 
       await program.parseAsync(['node', 'workout', '--profile', 'mike', '--json', 'injury', 'update', String(injury.id), '-s', 'severe', '-n', 'swelling increased']);
       
-      const updated = db.prepare('SELECT * FROM injuries WHERE id = ?').get(injury.id);
+      const updated = db.prepare('SELECT * FROM injuries WHERE id = ?').get(injury.id) as any;
       expect(updated.severity).toBe('severe');
       expect(updated.notes).toBe('swelling increased');
     });

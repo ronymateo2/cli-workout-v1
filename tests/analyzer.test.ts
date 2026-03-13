@@ -33,7 +33,7 @@ describe('analyzer module tests', () => {
         { date: '2024-01-08', weight: 105, reps: 5 },
       ];
 
-      const analyzed = analyzeProgression(history);
+      const analyzed = analyzeProgression(history as any);
 
       expect(analyzed.length).toBe(2);
       
@@ -61,7 +61,7 @@ describe('analyzer module tests', () => {
         { date: '2024-02-01', weight: 100, reps: 8 },
         { date: '2024-01-01', weight: 100, reps: 8 },
       ];
-      const analyzed = analyzeProgression(history);
+      const analyzed = analyzeProgression(history as any);
       expect(analyzed[0].date).toBe('2024-01-01');
       expect(analyzed[1].date).toBe('2024-02-01');
     });
@@ -72,7 +72,7 @@ describe('analyzer module tests', () => {
       const sessions = [
         { maxE1rm: 120, volumeLoad: 3000, sets: [] }
       ];
-      const result = detectRegression(sessions);
+      const result = detectRegression(sessions as any);
       expect(result.detected).toBe(false);
       expect(result.sustained).toBe(false);
     });
@@ -82,7 +82,7 @@ describe('analyzer module tests', () => {
         { maxE1rm: 100, volumeLoad: 3000, sets: [] },
         { maxE1rm: 88, volumeLoad: 2900, sets: [] },  // -12% e1RM
       ];
-      const result = detectRegression(sessions);
+      const result = detectRegression(sessions as any);
       expect(result.detected).toBe(true);
       expect(result.e1rmDrop).toBe(true);
       expect(result.e1rmChange).toBe(-12);
@@ -93,7 +93,7 @@ describe('analyzer module tests', () => {
         { maxE1rm: 100, volumeLoad: 3000, sets: [] },
         { maxE1rm: 98, volumeLoad: 2300, sets: [] },  // -23.3% volume
       ];
-      const result = detectRegression(sessions);
+      const result = detectRegression(sessions as any);
       expect(result.detected).toBe(true);
       expect(result.volumeDrop).toBe(true);
     });
@@ -103,7 +103,7 @@ describe('analyzer module tests', () => {
         { maxE1rm: 100, volumeLoad: 3000, sets: [] },
         { maxE1rm: 95, volumeLoad: 2700, sets: [] },  // -5% e1RM, -10% volume (both under threshold)
       ];
-      const result = detectRegression(sessions);
+      const result = detectRegression(sessions as any);
       expect(result.detected).toBe(false);
     });
 
@@ -113,7 +113,7 @@ describe('analyzer module tests', () => {
         { maxE1rm: 105, volumeLoad: 3200, sets: [] },  // -12.5% e1RM drop
         { maxE1rm: 90, volumeLoad: 2500, sets: [] },   // -14.3% e1RM drop again
       ];
-      const result = detectRegression(sessions);
+      const result = detectRegression(sessions as any);
       expect(result.detected).toBe(true);
       expect(result.sustained).toBe(true);
     });
@@ -124,7 +124,7 @@ describe('analyzer module tests', () => {
         { maxE1rm: 110, volumeLoad: 3500, sets: [] },  // improved
         { maxE1rm: 95, volumeLoad: 2700, sets: [] },   // dropped from 110 (-13.6%), but session 1→2 was fine
       ];
-      const result = detectRegression(sessions);
+      const result = detectRegression(sessions as any);
       expect(result.detected).toBe(true);
       expect(result.sustained).toBe(false);
     });
@@ -134,7 +134,7 @@ describe('analyzer module tests', () => {
         { maxE1rm: 100, volumeLoad: 3000, sets: [] },
         { maxE1rm: 115, volumeLoad: 3600, sets: [] },
       ];
-      const result = detectRegression(sessions);
+      const result = detectRegression(sessions as any);
       expect(result.detected).toBe(false);
       expect(result.e1rmChange).toBeGreaterThan(0);
       expect(result.volumeChange).toBeGreaterThan(0);
@@ -147,7 +147,7 @@ describe('analyzer module tests', () => {
         maxE1rm: 130, volumeLoad: 3600,
         sets: [{ weight: 100, reps: 12 }]
       }];
-      const rec = generateRecommendation(analyzed);
+      const rec = generateRecommendation(analyzed as any);
       expect(rec).toContain('Increase the weight to 102.5kg');
     });
 
@@ -156,7 +156,7 @@ describe('analyzer module tests', () => {
         maxE1rm: 120, volumeLoad: 2800,
         sets: [{ weight: 100, reps: 7 }]
       }];
-      const rec = generateRecommendation(analyzed);
+      const rec = generateRecommendation(analyzed as any);
       expect(rec).toContain('Keep the weight exactly the same');
       expect(rec).toContain('push for 8-9 reps');
     });
@@ -166,13 +166,13 @@ describe('analyzer module tests', () => {
         maxE1rm: 133, volumeLoad: 3000,
         sets: [{ weight: 100, reps: 10 }]
       }];
-      const rec = generateRecommendation(analyzed);
+      const rec = generateRecommendation(analyzed as any);
       expect(rec).toContain('You are in the sweet spot');
       expect(rec).toContain('push closer to 12 reps');
     });
 
     test('should return null for empty data', () => {
-      expect(generateRecommendation([])).toBeNull();
+      expect(generateRecommendation([] as any)).toBeNull();
     });
 
     // ── Injury / Regression Scenarios ──────────────────────────
@@ -182,7 +182,7 @@ describe('analyzer module tests', () => {
         { maxE1rm: 130, volumeLoad: 3600, sets: [{ weight: 100, reps: 10 }] },
         { maxE1rm: 110, volumeLoad: 3000, sets: [{ weight: 85, reps: 10 }] },  // -15.4% e1RM
       ];
-      const rec = generateRecommendation(analyzed);
+      const rec = generateRecommendation(analyzed as any);
       expect(rec).toContain('Performance regression detected');
       expect(rec).toContain('Do NOT push for progressive overload');
     });
@@ -192,7 +192,7 @@ describe('analyzer module tests', () => {
         { maxE1rm: 130, volumeLoad: 4000, sets: [{ weight: 100, reps: 12 }] },
         { maxE1rm: 128, volumeLoad: 3000, sets: [{ weight: 100, reps: 10 }] },  // -25% volume
       ];
-      const rec = generateRecommendation(analyzed);
+      const rec = generateRecommendation(analyzed as any);
       expect(rec).toContain('Performance regression detected');
       expect(rec).toContain('volume dropped');
     });
@@ -203,7 +203,7 @@ describe('analyzer module tests', () => {
         { maxE1rm: 120, volumeLoad: 3400, sets: [{ weight: 90, reps: 10 }] },  // -14.3%
         { maxE1rm: 100, volumeLoad: 2600, sets: [{ weight: 75, reps: 10 }] },  // -16.7%
       ];
-      const rec = generateRecommendation(analyzed);
+      const rec = generateRecommendation(analyzed as any);
       expect(rec).toContain('Sustained performance decline');
       expect(rec).toContain('deload week');
       expect(rec).toContain('consult a professional');
@@ -214,7 +214,7 @@ describe('analyzer module tests', () => {
         { maxE1rm: 130, volumeLoad: 3600, sets: [{ weight: 100, reps: 10 }] },
         { maxE1rm: 133, volumeLoad: 3800, sets: [{ weight: 100, reps: 12 }] },  // improved
       ];
-      const rec = generateRecommendation(analyzed);
+      const rec = generateRecommendation(analyzed as any);
       // Should NOT mention regression
       expect(rec).not.toContain('regression');
       expect(rec).not.toContain('Sustained');
@@ -228,7 +228,7 @@ describe('analyzer module tests', () => {
         { maxE1rm: 133, volumeLoad: 3600, sets: [{ weight: 100, reps: 10 }] },
         { maxE1rm: 80, volumeLoad: 1440, sets: [{ weight: 60, reps: 8 }] },  // massive drop
       ];
-      const rec = generateRecommendation(analyzed);
+      const rec = generateRecommendation(analyzed as any);
       expect(rec).toContain('Performance regression detected');
       expect(rec).toContain('reduce by 10-20%');
       expect(rec).toContain('monitor how your body feels');

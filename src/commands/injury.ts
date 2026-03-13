@@ -65,7 +65,7 @@ injuryCmd
       if (!options.all) query += " AND status = 'active'";
       query += ' ORDER BY start_date DESC';
 
-      const injuries = db.prepare(query).all(profile.id);
+      const injuries = db.prepare(query).all(profile.id) as any[];
 
       if (isJson) {
         console.log(JSON.stringify(injuries, null, 2));
@@ -115,7 +115,7 @@ injuryCmd
       const profile = getProfile(injuryCmd.parent.opts().profile);
       const id = parseInt(idStr, 10);
 
-      const injury = db.prepare('SELECT * FROM injuries WHERE id = ? AND profile_id = ?').get(id, profile.id);
+      const injury = db.prepare('SELECT * FROM injuries WHERE id = ? AND profile_id = ?').get(id, profile.id) as any;
       if (!injury) throw new Error(`Injury #${id} not found for this profile.`);
       if (injury.status === 'recovered') throw new Error(`Injury #${id} is already marked as recovered.`);
 
@@ -144,7 +144,7 @@ injuryCmd
       const profile = getProfile(injuryCmd.parent.opts().profile);
       const id = parseInt(idStr, 10);
 
-      const injury = db.prepare('SELECT * FROM injuries WHERE id = ? AND profile_id = ?').get(id, profile.id);
+      const injury = db.prepare('SELECT * FROM injuries WHERE id = ? AND profile_id = ?').get(id, profile.id) as any;
       if (!injury) throw new Error(`Injury #${id} not found for this profile.`);
 
       if (options.severity) {

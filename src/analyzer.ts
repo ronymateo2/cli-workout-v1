@@ -3,7 +3,7 @@
  * e1RM = Weight × (1 + 0.0333 × Reps)
  * Works best for reps ≤ 12.
  */
-export function calculateEpley1RM(weight, reps) {
+export function calculateEpley1RM(weight: number, reps: number): number {
   if (!weight || weight <= 0) return 0;
   if (!reps || reps <= 0) return 0;
   if (reps === 1) return weight;
@@ -14,7 +14,9 @@ export function calculateEpley1RM(weight, reps) {
  * Analyzes historical sets and groups them by workout to track progression metrics.
  * Expects array of sets sorted chronologically: [{ date, weight, reps, set_number }, ...]
  */
-export function analyzeProgression(historySets) {
+import { WorkoutSet, AnalyzedSession } from './types.js';
+
+export function analyzeProgression(historySets: WorkoutSet[]): AnalyzedSession[] {
   if (!historySets || historySets.length === 0) return [];
 
   const sessionsMap = new Map();
@@ -29,7 +31,7 @@ export function analyzeProgression(historySets) {
       });
     }
     
-    const session = sessionsMap.get(set.date);
+    const session = sessionsMap.get(set.date) as any;
     session.sets.push(set);
     
     const e1rm = calculateEpley1RM(set.weight, set.reps);
@@ -41,7 +43,7 @@ export function analyzeProgression(historySets) {
   }
 
   // Convert map to sorted array (oldest to newest)
-  return Array.from(sessionsMap.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
+  return Array.from(sessionsMap.values()).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 }
 
 /**
@@ -53,7 +55,7 @@ export function analyzeProgression(historySets) {
  *  - Volume drop ≥ 20% → fatigue accumulation, possible overtraining or injury avoidance
  *  - Consecutive session drops → sustained regression trend
  */
-export function detectRegression(analyzedSessions) {
+export function detectRegression(analyzedSessions: AnalyzedSession[]) {
   if (analyzedSessions.length < 2) {
     return { detected: false, e1rmChange: 0, volumeChange: 0, sustained: false };
   }
@@ -105,7 +107,7 @@ export function detectRegression(analyzedSessions) {
  *  2. Single-session regression → recommend deload / caution
  *  3. Normal double progression logic
  */
-export function generateRecommendation(analyzedSessions) {
+export function generateRecommendation(analyzedSessions: AnalyzedSession[]): string | null {
   if (analyzedSessions.length === 0) return null;
 
   // ── Injury / Regression Check ──────────────────────────────────

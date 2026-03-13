@@ -5,7 +5,7 @@ export function getActiveWorkout(profileId) {
     SELECT * FROM workouts 
     WHERE profile_id = ? AND status = 'active'
     ORDER BY start_time DESC LIMIT 1
-  `).get(profileId);
+  `).get(profileId) as any;
 }
 
 export function startWorkout(profileId, templateId = null) {
@@ -22,7 +22,7 @@ export function endWorkout(workoutId, status = 'completed') {
 }
 
 export function getExerciseByName(name) {
-  const exercise = db.prepare('SELECT * FROM exercises WHERE name = ? COLLATE NOCASE').get(name);
+  const exercise = db.prepare('SELECT * FROM exercises WHERE name = ? COLLATE NOCASE').get(name) as any;
   if (!exercise) {
     throw new Error(`Exercise '${name}' not found in the library. Add it first using \`workout exercises add \"${name}\" --muscles ...\``);
   }
@@ -31,7 +31,7 @@ export function getExerciseByName(name) {
 
 export function logSets(workoutId, exerciseId, sets) {
   // sets is an array of {weight, reps, rir, notes}
-  const maxSetRow = db.prepare('SELECT MAX(set_number) as max_set FROM workout_sets WHERE workout_id = ? AND exercise_id = ?').get(workoutId, exerciseId);
+  const maxSetRow = db.prepare('SELECT MAX(set_number) as max_set FROM workout_sets WHERE workout_id = ? AND exercise_id = ?').get(workoutId, exerciseId) as any;
   let startingSet = (maxSetRow.max_set || 0) + 1;
 
   const insertSet = db.prepare('INSERT INTO workout_sets (workout_id, exercise_id, weight, reps, rir, set_number, notes) VALUES (?, ?, ?, ?, ?, ?, ?)');

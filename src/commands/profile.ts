@@ -10,7 +10,7 @@ profileCmd
   .description('List all profiles')
   .action(() => {
     const isJson = profileCmd.parent.opts().json;
-    const profiles = db.prepare('SELECT * FROM profiles ORDER BY name ASC').all();
+    const profiles = db.prepare('SELECT * FROM profiles ORDER BY name ASC').all() as any[];
 
     if (isJson) {
       console.log(JSON.stringify(profiles, null, 2));
@@ -64,7 +64,7 @@ profileCmd
     const isJson = profileCmd.parent.opts().json;
     
     // Check if it exists
-    const existing = db.prepare('SELECT * FROM profiles WHERE name = ? COLLATE NOCASE').get(name);
+    const existing = db.prepare('SELECT * FROM profiles WHERE name = ? COLLATE NOCASE').get(name) as any;
     if (!existing) {
       const errObj = { error: `Profile '${name}' not found.` };
       if (isJson) console.log(JSON.stringify(errObj));

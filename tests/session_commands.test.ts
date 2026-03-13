@@ -36,7 +36,7 @@ describe('session commands tests', () => {
   test('start command should create a workout', async () => {
     await program.parseAsync(['node', 'workout', '--profile', 'mike', '--json', 'start', '--empty']);
     
-    const workout = db.prepare("SELECT * FROM workouts WHERE profile_id = (SELECT id FROM profiles WHERE name = 'mike')").get();
+    const workout = db.prepare("SELECT * FROM workouts WHERE profile_id = (SELECT id FROM profiles WHERE name = 'mike')").get() as any;
     expect(workout).toBeDefined();
     expect(workout.status).toBe('active');
   });
@@ -46,7 +46,7 @@ describe('session commands tests', () => {
     
     await program.parseAsync(['node', 'workout', '--profile', 'mike', '--json', 'log', 'Bench Press', '100', '10,10']);
     
-    const sets = db.prepare('SELECT * FROM workout_sets').all();
+    const sets = db.prepare('SELECT * FROM workout_sets').all() as any[];
     expect(sets.length).toBe(2);
     expect(sets[0].weight).toBe(100);
   });
@@ -56,7 +56,7 @@ describe('session commands tests', () => {
     
     await program.parseAsync(['node', 'workout', '--profile', 'mike', '--json', 'done']);
     
-    const workout = db.prepare('SELECT status FROM workouts').get();
+    const workout = db.prepare('SELECT status FROM workouts').get() as any;
     expect(workout.status).toBe('completed');
   });
 
@@ -66,7 +66,7 @@ describe('session commands tests', () => {
     
     await program.parseAsync(['node', 'workout', '--profile', 'mike', '--json', 'undo']);
     
-    const count = db.prepare('SELECT COUNT(*) as count FROM workout_sets').get().count;
+    const count = (db.prepare('SELECT COUNT(*) as count FROM workout_sets').get() as any).count;
     expect(count).toBe(0);
   });
 });
