@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build",
+    "prepare": "npm run build",
     "test": "cross-env NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --runInBand"
   },
   "keywords": [],
